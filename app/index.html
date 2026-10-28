@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17123a">
+<meta name="description" content="A morning, a day and a night, each with its own bird.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JournalBird">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>JournalBird</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@400;500&display=swap">
+<style>
+/* Layout: a single centered column over a sky that follows the bird you're with: bluebird dawn, cardinal daylight, owl night. */
+:root {
+  --night: #0e0b1c;
+  --dusk: #261733;
+  --gold: #f4c46a;
+  --bone: #f4ede3;
+  --ash: #a99fbb;
+  --line: rgba(244, 237, 227, 0.18);
+  --field: rgba(244, 237, 227, 0.07);
+  --card: rgba(16, 11, 36, 0.48);
+  --accent: #8fc3ff;
+  --display: "Marcellus", "Trajan Pro", Georgia, serif;
+  --body: "Spectral", Georgia, "Times New Roman", serif;
+  --label: "Jost", "Futura", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+body[data-sky="morning"] { --accent: #8fc3ff; }
+body[data-sky="day"] { --accent: #ff9a80; }
+body[data-sky="night"] { --accent: #f4c46a; --hb: #1c1740; --hf: #120e2b; }
+body[data-sky="morning"] { --hb: #4d3b7d; --hf: #2f2457; }
+body[data-sky="day"] { --hb: #4f9a6a; --hf: #356f50; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--bone);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Sky */
+.sky, .sky > * { position: fixed; inset: 0; pointer-events: none; }
+.sky .layer { transition: opacity 2.4s ease; opacity: 0; }
+.sky .l-morning { background:
+  radial-gradient(90% 50% at 50% 100%, rgba(255,214,150,0.85) 0%, rgba(255,160,130,0.45) 40%, rgba(255,160,130,0) 75%),
+  linear-gradient(to top, #ffb98a 0%, #f08fa0 24%, #9a6bb8 55%, #3c4a96 100%); }
+.sky .l-day { background: linear-gradient(to top, #ffe3a3 0%, #9fd2f2 34%, #54a0e0 70%, #2c62b0 100%); }
+.sky .l-night { background:
+  radial-gradient(120% 70% at 50% 110%, #3a2358 0%, rgba(58,35,88,0) 60%),
+  linear-gradient(to top, #261733 0%, #17123a 50%, #0b0919 100%); }
+body[data-sky="morning"] .l-morning, body[data-sky="day"] .l-day, body[data-sky="night"] .l-night { opacity: 1; }
+#motes { width: 100%; height: 100%; }
+
+.sun {
+  inset: auto; width: min(46vw, 210px); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, #fffbe6 0%, #ffe29a 26%, rgba(255,200,110,0.55) 46%, rgba(255,190,100,0) 70%);
+  transform: translate(-50%, -50%); left: 50%; top: 84%; opacity: 0;
+  transition: left 2.4s ease, top 2.4s ease, opacity 2.4s ease;
+}
+body[data-sky="morning"] .sun { opacity: 1; left: 50%; top: 80%; }
+body[data-sky="day"] .sun { opacity: 1; left: 80%; top: 12%; }
+.moon {
+  inset: auto; right: 13%; top: 8%; width: 84px; height: 84px; border-radius: 50%;
+  background:
+    radial-gradient(circle at 64% 62%, rgba(176,156,118,0.4) 0 9%, transparent 10%),
+    radial-gradient(circle at 32% 70%, rgba(176,156,118,0.32) 0 6%, transparent 7%),
+    radial-gradient(circle at 38% 30%, rgba(176,156,118,0.28) 0 5%, transparent 6%),
+    radial-gradient(circle at 36% 34%, #fffaf0, #f2e6c8 60%, #d8c9a4);
+  box-shadow: 0 0 50px 12px rgba(255,244,214,0.35), 0 0 150px 54px rgba(190,170,255,0.14);
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 2.4s ease, transform 2.4s ease;
+}
+body[data-sky="night"] .moon { opacity: 1; transform: none; }
+.cloud { inset: auto; width: 190px; color: #fff; opacity: 0; filter: blur(1.2px); transition: opacity 2.4s ease, color 2.4s ease; animation: drift 140s linear infinite alternate; }
+.cloud.c1 { top: 16%; }
+.cloud.c2 { top: 34%; width: 140px; animation-duration: 190s; animation-delay: -60s; }
+.cloud.c3 { top: 8%; width: 230px; animation-duration: 240s; animation-delay: -120s; }
+body[data-sky="morning"] .cloud { opacity: 0.4; color: #ffd8d0; }
+body[data-sky="day"] .cloud { opacity: 0.85; color: #fff; }
+@keyframes drift { from { transform: translateX(-35vw); } to { transform: translateX(110vw); } }
+.hills { inset: auto; left: 0; right: 0; bottom: 0; width: 100%; height: 24vh; min-height: 120px; }
+.hills .hb { fill: var(--hb); transition: fill 2.4s ease; }
+.hills .hf { fill: var(--hf); transition: fill 2.4s ease; }
+
+/* App frame */
+.app { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; padding-inline: 16px; overflow-y: auto; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 16px 4px; width: 100%; max-width: 40rem; margin-inline: auto; }
+.wordmark { font-family: var(--display); letter-spacing: 0.4em; font-size: 0.78rem; color: var(--bone); background: none; border: none; padding: 6px 0; text-shadow: 0 1px 12px rgba(0,0,0,0.35); }
+.top-links { display: flex; gap: 6px; }
+.stage { flex: 1; width: 100%; max-width: 36rem; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; padding-block: 14px 56px; min-width: 0; }
+.scene { display: flex; flex-direction: column; gap: 18px; animation: rise 0.9s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.eyebrow { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ash); }
+.hero .eyebrow { color: rgba(244,237,227,0.82); text-shadow: 0 1px 10px rgba(0,0,0,0.4); }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; line-height: 1.15; }
+h1 { font-size: clamp(2.2rem, 8vw, 3.2rem); letter-spacing: 0.05em; text-shadow: 0 2px 24px rgba(0,0,0,0.35); }
+h2 { font-size: clamp(1.4rem, 5vw, 1.8rem); }
+h3 { font-size: 1.15rem; }
+p { margin: 0; }
+.lede { color: rgba(244,237,227,0.88); font-size: 1.02rem; max-width: 30rem; text-shadow: 0 1px 12px rgba(0,0,0,0.4); }
+.dim { color: var(--ash); font-style: italic; font-size: 0.98rem; }
+.fine { font-family: var(--label); font-size: 0.75rem; letter-spacing: 0.06em; color: var(--ash); }
+.center { text-align: center; align-items: center; }
+
+/* Hero + birds */
+.hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+.bird { background: none; border: none; padding: 0; display: grid; place-items: center; cursor: pointer; }
+.bird svg { width: min(300px, 78vw); height: auto; overflow: visible; filter: drop-shadow(0 10px 22px rgba(0,0,0,0.3)); }
+.bird .bob { animation: bob 4.5s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-3px); } }
+.bird .head { animation: tilt 9s ease-in-out infinite; }
+@keyframes tilt { 0%, 38%, 100% { transform: rotate(0); } 44%, 60% { transform: rotate(-7deg); } 68%, 82% { transform: rotate(4deg); } }
+.bird .eye { animation: blink 5.5s infinite; }
+.bird .owl-all { transform-origin: 130px 166px; animation: sway 8s ease-in-out infinite; }
+@keyframes sway { 0%, 100% { transform: rotate(0); } 35% { transform: rotate(-2.2deg); } 70% { transform: rotate(2deg); } }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.06); } }
+.bird.hop svg { animation: hop 0.55s cubic-bezier(.3,.7,.4,1); }
+@keyframes hop { 30% { transform: translateY(-16px) rotate(-2deg); } 60% { transform: translateY(0); } 78% { transform: translateY(-5px); } }
+.owl .shut { display: none; }
+.owl.asleep .shut { display: inline; }
+.owl.asleep .open { display: none; }
+.owl.asleep .owl-all { animation: breathe 5s ease-in-out infinite; }
+@keyframes breathe { 50% { transform: scale(1.025, 1.035); } }
+.z { font-family: var(--display); fill: #e8defa; opacity: 0; animation: zee 4.5s ease-in-out infinite; }
+.z.z2 { animation-delay: 1.5s; }
+.owl:not(.asleep) .z { display: none; }
+@keyframes zee { 0% { opacity: 0; transform: translate(0, 8px); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translate(10px, -20px); } }
+.note-pop { position: absolute; pointer-events: none; font-size: 1.4rem; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.4); animation: floatup 1.4s ease-out forwards; }
+@keyframes floatup { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-60px); } }
+.bird-wrap { position: relative; }
+.bubble { position: relative; max-width: 21rem; padding: 10px 16px; border-radius: 16px; background: rgba(244,237,227,0.93); color: #2a2236; font-style: italic; font-size: 1rem; line-height: 1.4; box-shadow: 0 6px 24px rgba(0,0,0,0.22); }
+.bubble::before { content: ""; position: absolute; top: -7px; left: 50%; margin-left: -7px; border: 7px solid transparent; border-top: 0; border-bottom-color: rgba(244,237,227,0.93); }
+
+/* Phase nav */
+.phases { display: flex; gap: 6px; margin: 6px auto 0; max-width: 26rem; width: 100%; }
+.phase { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--label); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 9px 6px; border-radius: 999px; border: 1px solid var(--line); background: rgba(16,11,36,0.32); color: rgba(244,237,227,0.75); transition: border-color 0.3s, background 0.3s; }
+.phase i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
+.phase[aria-current="page"] { color: var(--bone); border-color: var(--c); background: rgba(16,11,36,0.6); }
+.phase:disabled { opacity: 0.45; cursor: default; }
+
+/* Cards and controls */
+.card { background: var(--card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 20px; padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card .prompt { font-family: var(--display); font-size: 1.2rem; line-height: 1.3; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.center .actions, .actions.center { justify-content: center; }
+.btn { font-family: var(--label); font-size: 0.82rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 15px 26px; border-radius: 999px; border: 1px solid var(--accent); background: linear-gradient(180deg, rgba(244,237,227,0.16), rgba(244,237,227,0.05)); background-color: rgba(16,11,36,0.5); color: var(--bone); transition: background-color 0.3s, transform 0.2s, opacity 0.3s; }
+.btn:hover { background-color: rgba(16,11,36,0.25); }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn.small { padding: 11px 18px; font-size: 0.72rem; }
+.ghost { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; background: none; border: none; color: rgba(244,237,227,0.8); padding: 10px 6px; text-shadow: 0 1px 10px rgba(0,0,0,0.4); }
+.ghost:hover { color: #fff; }
+.link { background: none; border: none; padding: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+input[type="text"], textarea { width: 100%; font: inherit; font-size: 1.05rem; color: var(--bone); background: var(--field); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; resize: vertical; box-sizing: border-box; }
+textarea { min-height: 7rem; line-height: 1.55; }
+textarea.tall { min-height: 11rem; }
+input::placeholder, textarea::placeholder { color: rgba(169,159,187,0.7); font-style: italic; }
+input:focus, textarea:focus { outline: none; border-color: var(--accent); background: rgba(244,237,227,0.1); }
+
+/* Tasks */
+.bar { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s ease; }
+.progress { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.task { display: flex; align-items: center; gap: 12px; padding-block: 9px; border-top: 1px solid var(--line); }
+.task:first-child { border-top: none; }
+.task span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.check { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--accent); background: transparent; flex: none; display: grid; place-items: center; padding: 0; transition: background 0.25s; }
+.task.done .check { background: var(--accent); }
+.task.done .check::after { content: ""; width: 7px; height: 12px; border: solid #1a1426; border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+.task.done span { text-decoration: line-through; color: var(--ash); }
+.x { background: none; border: none; color: var(--ash); font-size: 1.4rem; line-height: 1; padding: 4px 8px; }
+.x:hover { color: var(--bone); }
+.add { display: flex; gap: 10px; }
+.add input { flex: 1; }
+
+/* Check-ins */
+.moods { display: flex; flex-wrap: wrap; gap: 8px; }
+.mood { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--field); color: var(--bone); display: inline-flex; align-items: center; gap: 7px; }
+.mood i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.mood[aria-pressed="true"] { border-color: var(--c); background: rgba(244,237,227,0.14); }
+.feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.feed li { display: grid; grid-template-columns: 4.6rem 1fr auto; gap: 10px; align-items: start; padding-block: 10px; border-top: 1px solid var(--line); }
+.feed time { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--ash); padding-top: 4px; }
+.feed .what { min-width: 0; display: flex; flex-direction: column; gap: 4px; overflow-wrap: anywhere; }
+.chip { align-self: flex-start; font-family: var(--label); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--c, var(--line)); color: var(--bone); }
+.excerpt { white-space: pre-wrap; overflow-wrap: anywhere; font-style: italic; font-weight: 300; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; border-left: 1px solid var(--accent); padding-left: 14px; }
+.big { font-family: var(--display); font-size: 1.35rem; line-height: 1.3; overflow-wrap: anywhere; }
+.pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.done-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.done-list li { display: flex; gap: 10px; align-items: baseline; overflow-wrap: anywhere; }
+.done-list .m { font-family: var(--label); color: var(--accent); flex: none; }
+.done-list .off { color: var(--ash); }
+.done-list .on { text-decoration: line-through; color: var(--ash); }
+.row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+
+/* History */
+.hist { text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 16px 18px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); width: 100%; }
+.hist:hover { border-color: var(--accent); }
+.hist .d { font-family: var(--display); font-size: 1.15rem; }
+.hist .s { color: var(--ash); font-style: italic; overflow-wrap: anywhere; grid-column: 1 / -1; }
+.dots { display: flex; gap: 6px; align-items: center; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.dots i.off { background: transparent; border: 1px solid var(--line); }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.stats { display: flex; gap: 22px; flex-wrap: wrap; }
+.stats div { display: flex; flex-direction: column; }
+.stats strong { font-family: var(--display); font-weight: 400; font-size: 1.9rem; line-height: 1.1; }
+.search { margin-bottom: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .scene { opacity: 1; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="cloud" viewBox="0 0 120 50"><path d="M20 44 C6 44 2 30 14 26 C14 14 30 10 38 18 C42 6 66 4 74 16 C86 8 106 14 104 30 C116 30 118 44 102 44 Z" fill="currentColor"/></symbol>
+</defs></svg>
+
+<div class="sky" aria-hidden="true">
+  <div class="layer l-morning"></div><div class="layer l-day"></div><div class="layer l-night"></div>
+  <div class="sun"></div><div class="moon"></div>
+  <svg class="cloud c1" viewBox="0 0 120 50"><use href="#cloud"/></svg>
+  <svg class="cloud c2" viewBox="0 0 120 50"><use href="#cloud"/></svg>
+  <svg class="cloud c3" viewBox="0 0 120 50"><use href="#cloud"/></svg>
+  <canvas id="motes"></canvas>
+  <svg class="hills" viewBox="0 0 400 120" preserveAspectRatio="none">
+    <path class="hb" d="M0 60 C60 28 120 36 180 56 S320 74 400 34 L400 120 L0 120Z"/>
+    <path class="hf" d="M0 86 C70 62 140 70 210 88 S340 100 400 70 L400 120 L0 120Z"/>
+  </svg>
+</div>
+
+<div class="app">
+  <div class="topbar">
+    <button class="wordmark" data-go="home">JOURNALBIRD</button>
+    <div class="top-links">
+      <button class="ghost" id="b-hist" data-go="history">Journal</button>
+      <button class="ghost" data-go="settings">Me</button>
+    </div>
+  </div>
+  <nav class="phases" id="nav" aria-label="Parts of the day"></nav>
+  <main class="stage" id="stage"></main>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const pad = n => String(n).padStart(2, '0');
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dateOf = k => new Date(k + 'T12:00:00');
+const longDate = k => dateOf(k).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+const shortDate = k => dateOf(k).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+const clock = ts => new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+/* ---------- storage ---------- */
+const KEY = 'journalbird.v1';
+let db = { settings: { name: '', welcomed: false }, days: {} };
+try { const raw = JSON.parse(localStorage.getItem(KEY)); if (raw && raw.days) db = { settings: { name: '', welcomed: false, ...(raw.settings || {}) }, days: raw.days }; } catch {}
+let saveTimer = 0;
+const flush = () => { clearTimeout(saveTimer); saveTimer = 0; try { localStorage.setItem(KEY, JSON.stringify(db)); } catch {} };
+const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(flush, 300); };
+
+/* ---------- days ---------- */
+let today = dayKey();
+const blank = () => ({ phase: 'morning', intention: '', journal: '', notes: '', tasks: [], checkins: [], good: '', bedtime: '', nightJournal: '' });
+const getDay = k => db.days[k] || (db.days[k] = blank());
+const day = () => getDay(today);
+const PHASES = ['morning', 'day', 'night'];
+const reach = d => ({ morning: 0, day: 1, night: 2, done: 2 }[d.phase]);
+const hasContent = d => !!(d.journal.trim() || d.intention.trim() || d.notes.trim() || d.tasks.length || d.checkins.length || d.good.trim() || d.bedtime.trim() || d.nightJournal.trim());
+const hash = s => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+const MORNING_PROMPTS = [
+  "What's on your mind as the day begins?", 'How did you wake up: body, heart, head?', 'What would make today feel well spent?',
+  'What are you looking forward to, even a little?', 'What do you want to let go of before the day starts?',
+  'Who or what do you want to show up for today?', "Write whatever's loudest in your head."];
+const NIGHT_PROMPTS = [
+  'What do you want to remember about today?', 'What took your energy, and what gave it back?', 'What are you proud of, even if it was small?',
+  'What surprised you today?', 'What would you tell tomorrow-you?', 'What are you grateful for tonight?', 'What did today teach you?'];
+const promptFor = (list, k) => list[hash(k) % list.length];
+const streak = () => {
+  let n = 0; const d = dateOf(today);
+  if (!(db.days[dayKey(d)] && hasContent(db.days[dayKey(d)]))) d.setDate(d.getDate() - 1);
+  for (;;) { const e = db.days[dayKey(d)]; if (!e || !hasContent(e)) break; n++; d.setDate(d.getDate() - 1); }
+  return n;
+};
+const greetName = () => db.settings.name ? `, ${esc(db.settings.name)}` : '';
+
+/* ---------- the birds ---------- */
+const branch = (dk, lt, a, b) => `
+<path d="M-4 174 C50 164 112 178 168 170 S238 162 264 168" fill="none" stroke="${dk}" stroke-width="10" stroke-linecap="round"/>
+<path d="M-4 171 C50 161 112 175 168 167 S238 159 264 165" fill="none" stroke="${lt}" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+<path d="M206 166 C214 146 236 142 250 148 C244 164 228 170 206 166Z" fill="${a}"/>
+<path d="M206 166 C220 158 232 154 246 150" stroke="${b}" stroke-width="1.6" fill="none"/>
+<path d="M30 172 C28 154 12 148 0 152 C6 166 18 174 30 172Z" fill="${b}"/>
+<path d="M62 170 C70 156 84 154 94 158 C88 168 76 172 62 170Z" fill="${a}"/>`;
+
+const bluebird = () => `<svg viewBox="0 0 260 200" role="img" aria-label="A bluebird on a branch">
+<defs>
+ <linearGradient id="bbB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fb6f5"/><stop offset="1" stop-color="#3b6fc6"/></linearGradient>
+ <linearGradient id="bbR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6b57f"/><stop offset="1" stop-color="#e9895a"/></linearGradient>
+ <radialGradient id="bbG"><stop offset="0" stop-color="#ffe2b0" stop-opacity=".55"/><stop offset="1" stop-color="#ffe2b0" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="128" cy="112" r="96" fill="url(#bbG)"/>
+${branch('#5b3f30', '#8a6650', '#66a980', '#4c8a68')}
+<g class="bob">
+ <path d="M168 128 L228 156 L216 168 L158 150Z" fill="#2c58a8"/>
+ <ellipse cx="128" cy="116" rx="52" ry="44" fill="url(#bbB)"/>
+ <path d="M98 100 C70 112 76 150 118 158 C150 160 160 140 150 120 C130 126 112 118 98 100Z" fill="url(#bbR)"/>
+ <path d="M126 96 C158 94 176 116 168 144 C148 148 122 134 112 112 C112 104 118 98 126 96Z" fill="#2c58a8"/>
+ <path d="M130 108 C146 110 158 122 160 136 M124 116 C138 120 148 130 150 140" stroke="#5b8fe0" stroke-width="2" fill="none" opacity=".7" stroke-linecap="round"/>
+ <path d="M112 158 v12 M130 160 v10" stroke="#2a2433" stroke-width="3.2" stroke-linecap="round"/>
+ <g class="head" style="transform-origin:110px 100px">
+  <circle cx="96" cy="80" r="30" fill="url(#bbB)"/>
+  <path d="M68 76 L48 84 L68 91Z" fill="#2a2433"/>
+  <circle cx="84" cy="90" r="5.5" fill="#ff9d7a" opacity=".38"/>
+  <g class="eye" style="transform-origin:86px 74px"><circle cx="86" cy="74" r="4.6" fill="#1a1426"/><circle cx="87.5" cy="72.4" r="1.6" fill="#fff"/></g>
+ </g>
+</g></svg>`;
+
+const cardinal = () => `<svg viewBox="0 0 260 200" role="img" aria-label="A cardinal on a branch">
+<defs>
+ <linearGradient id="cdB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0594b"/><stop offset="1" stop-color="#b52a2e"/></linearGradient>
+ <radialGradient id="cdG"><stop offset="0" stop-color="#fff0c4" stop-opacity=".6"/><stop offset="1" stop-color="#fff0c4" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="128" cy="112" r="96" fill="url(#cdG)"/>
+${branch('#5a3b2c', '#8a6650', '#5f9d6a', '#3f7d55')}
+<g class="bob">
+ <path d="M166 126 L238 158 L226 172 L156 152Z" fill="#a32a2d"/>
+ <ellipse cx="128" cy="116" rx="52" ry="44" fill="url(#cdB)"/>
+ <ellipse cx="106" cy="128" rx="30" ry="24" fill="#f27565" opacity=".5"/>
+ <path d="M126 96 C158 94 176 116 168 146 C148 150 122 134 112 112 C112 104 118 98 126 96Z" fill="#9a2227"/>
+ <path d="M130 108 C146 110 158 122 160 138 M124 116 C138 120 148 130 150 142" stroke="#c9423b" stroke-width="2" fill="none" opacity=".75" stroke-linecap="round"/>
+ <path d="M112 158 v12 M130 160 v10" stroke="#3a2a28" stroke-width="3.2" stroke-linecap="round"/>
+ <g class="head" style="transform-origin:110px 100px">
+  <circle cx="96" cy="80" r="30" fill="url(#cdB)"/>
+  <path d="M78 58 C84 38 100 24 118 12 C112 30 116 48 126 68Z" fill="#d93f3a"/>
+  <path d="M70 72 C70 62 82 60 92 66 C94 80 88 94 74 94 C66 90 66 80 70 72Z" fill="#2b1a22"/>
+  <path d="M66 74 L44 84 L66 95Z" fill="#ffa73b"/>
+  <path d="M44 84 L66 84" stroke="#d97d1c" stroke-width="1.6"/>
+  <g class="eye" style="transform-origin:84px 76px"><circle cx="84" cy="76" r="4.6" fill="#4a2e38" stroke="#8a5a64" stroke-width="1"/><circle cx="85.5" cy="74.4" r="1.7" fill="#fff"/></g>
+ </g>
+</g></svg>`;
+
+const owl = asleep => `<svg class="owl${asleep ? ' asleep' : ''}" viewBox="0 0 260 200" role="img" aria-label="An owl on a branch">
+<defs>
+ <linearGradient id="owB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9886bd"/><stop offset="1" stop-color="#58487f"/></linearGradient>
+ <radialGradient id="owE"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f0a93f"/></radialGradient>
+ <radialGradient id="owG"><stop offset="0" stop-color="#cdbdf5" stop-opacity=".4"/><stop offset="1" stop-color="#cdbdf5" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="130" cy="112" r="100" fill="url(#owG)"/>
+${branch('#3c2a38', '#6a4b58', '#4b7a78', '#37605f')}
+<g class="owl-all">
+ <path d="M96 60 L97 28 L122 50Z" fill="#6b5a92"/><path d="M164 60 L163 28 L138 50Z" fill="#6b5a92"/>
+ <ellipse cx="130" cy="110" rx="48" ry="56" fill="url(#owB)"/>
+ <path d="M84 92 C66 116 70 152 94 166 C102 142 102 114 96 92Z" fill="#4b3c72"/>
+ <path d="M176 92 C194 116 190 152 166 166 C158 142 158 114 164 92Z" fill="#4b3c72"/>
+ <ellipse cx="130" cy="132" rx="27" ry="33" fill="#e6dcf2" opacity=".92"/>
+ <path d="M116 116 q7 6 14 0 q7 6 14 0 M114 130 q8 6 16 0 q8 6 16 0 M116 144 q7 6 14 0 q7 6 14 0 M122 156 q4 4 8 0 q4 4 8 0" stroke="#9886bd" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+ <circle cx="110" cy="86" r="24" fill="#d8cdea"/><circle cx="150" cy="86" r="24" fill="#d8cdea"/>
+ <path d="M90 68 Q108 58 126 72 M170 68 Q152 58 134 72" stroke="#6b5a92" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+ <g class="open">
+  <g class="eye" style="transform-origin:110px 86px"><circle cx="110" cy="86" r="15" fill="url(#owE)"/><circle cx="110" cy="86" r="7.5" fill="#1a1426"/><circle cx="113.2" cy="82.4" r="2.6" fill="#fff"/></g>
+  <g class="eye" style="transform-origin:150px 86px"><circle cx="150" cy="86" r="15" fill="url(#owE)"/><circle cx="150" cy="86" r="7.5" fill="#1a1426"/><circle cx="153.2" cy="82.4" r="2.6" fill="#fff"/></g>
+ </g>
+ <g class="shut"><path d="M95 88 Q110 100 125 88 M135 88 Q150 100 165 88" stroke="#2a2036" stroke-width="3.2" fill="none" stroke-linecap="round"/></g>
+ <path d="M130 90 L123 102 L130 111 L137 102Z" fill="#ff9a4a"/>
+ <ellipse cx="116" cy="168" rx="10" ry="4.5" fill="#ffb36b"/><ellipse cx="144" cy="168" rx="10" ry="4.5" fill="#ffb36b"/>
+</g>
+<text class="z" x="186" y="64" font-size="22">z</text><text class="z z2" x="200" y="46" font-size="16">z</text>
+</svg>`;
+
+const BIRDS = {
+  morning: { name: 'Bluebird', svg: () => bluebird(), lines: ['Good morning! What shall we write today?', 'A fresh page and a fresh sky.', 'Tell me what the day could be.', 'Small plans count. Add one.', 'Breathe in. Then write.'] },
+  day: { name: 'Cardinal', svg: () => cardinal(), lines: ["Out in the day, one thing at a time.", 'Look at you, ticking things off!', 'A quick check-in is allowed. Even encouraged.', 'Water? Just asking.', "Whatever happens, you can write it down later."] },
+  night: { name: 'Owl', svg: () => owl(false), lines: ["Hoo's ready to wind down?", 'The day is done. Let it settle.', 'You did enough today.', "Set it all down. I'll keep watch.", 'Rest is part of the plan.'] },
+  asleep: { name: 'Owl', svg: () => owl(true), lines: ['Zzz…', 'Sleep well.', 'Zzz… tomorrow…'] },
+};
+let lineIx = 0;
+
+/* ---------- bird voices (tap a bird) ---------- */
+let ac;
+function voice(kind) {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    const t = ac.currentTime + 0.02;
+    const n = (f0, f1, at, dur, vol = 0.08) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f0, t + at); o.frequency.exponentialRampToValueAtTime(f1, t + at + dur);
+      g.gain.setValueAtTime(0.0001, t + at);
+      g.gain.exponentialRampToValueAtTime(vol, t + at + dur * 0.2);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + at + dur);
+      o.connect(g); g.connect(ac.destination); o.start(t + at); o.stop(t + at + dur + 0.02);
+    };
+    if (kind === 'morning') { [0, 0.16, 0.32].forEach((a, i) => n(2400 + i * 250, 3300 + i * 250, a, 0.12)); n(3000, 2500, 0.56, 0.24, 0.06); }
+    else if (kind === 'day') { [0, 0.22, 0.44, 0.66].forEach(a => n(2700, 1500, a, 0.18)); n(1800, 2600, 0.95, 0.16, 0.06); }
+    else if (kind === 'night') { n(380, 300, 0, 0.45, 0.12); n(380, 290, 0.62, 0.5, 0.12); }
+    else n(300, 260, 0, 0.8, 0.05);
+  } catch {}
+}
+
+/* ---------- screens ---------- */
+let view = 'morning';
+let mood = '';
+const MOODS = [['radiant', 'Radiant', '#ffd36a'], ['calm', 'Calm', '#8fd3c0'], ['okay', 'Okay', '#9db8ee'], ['tired', 'Tired', '#c1a4e6'], ['heavy', 'Heavy', '#ee8f86']];
+const moodOf = id => MOODS.find(m => m[0] === id);
+const chipHTML = id => { const m = moodOf(id); return m ? `<span class="chip" style="--c:${m[2]}">${m[1]}</span>` : ''; };
+
+const hero = (kind, title, lede) => {
+  const b = BIRDS[kind];
+  return `<header class="hero">
+    <div class="bird-wrap"><button class="bird" data-bird="${kind}" aria-label="Tap the ${b.name}">${b.svg()}</button></div>
+    <div class="bubble" id="bubble" aria-live="polite">${esc(b.lines[0])}</div>
+    <p class="eyebrow">${esc(longDate(today))}</p>
+    <h1>${title}</h1>
+    <p class="lede">${esc(lede)}</p>
+  </header>`;
+};
+const backLabel = d => ({ day: 'Back to my day', night: 'Back to tonight', done: 'Back to goodnight' }[d.phase]);
+const backTarget = d => d.phase === 'done' ? 'asleep' : d.phase;
+
+const tasksHTML = d => {
+  const total = d.tasks.length, done = d.tasks.filter(t => t.done).length;
+  const list = total ? `<ul class="tasks">${d.tasks.map(t => `<li class="task${t.done ? ' done' : ''}"><button class="check" role="checkbox" aria-checked="${t.done}" aria-label="${esc(t.t)}" data-act="toggle" data-id="${t.id}"></button><span>${esc(t.t)}</span><button class="x" data-act="deltask" data-id="${t.id}" aria-label="Remove task">×</button></li>`).join('')}</ul>` : `<p class="dim">Nothing here yet. Add the first thing.</p>`;
+  const prog = total ? `<div class="progress"><span class="fine">${done} of ${total} done</span><span class="fine">${total && done === total ? 'All done!' : ''}</span></div><div class="bar"><span style="width:${Math.round(done / total * 100)}%"></span></div>` : '';
+  return prog + list;
+};
+const taskCard = d => `<div class="card"><div class="eyebrow">Today's checklist</div><div id="tasks-wrap" class="stack">${tasksHTML(d)}</div>
+  <form class="add" data-form="task"><input type="text" name="t" placeholder="Add a task" autocomplete="off" aria-label="New task"><button class="btn small" type="submit">Add</button></form></div>`;
+
+function morningScreen() {
+  const d = day();
+  return `<section class="scene">
+  ${hero('morning', `Good morning${greetName()}`, 'A fresh page. Write it, plan it, then step into the day.')}
+  <div class="card"><label class="eyebrow" for="f-journal">Morning pages</label>
+    <p class="prompt">${esc(promptFor(MORNING_PROMPTS, today))}</p>
+    <textarea id="f-journal" class="tall" data-field="journal" placeholder="Write whatever comes…">\n${esc(d.journal)}</textarea></div>
+  <div class="card"><label class="eyebrow" for="f-int">One intention</label>
+    <input type="text" id="f-int" data-field="intention" value="${esc(d.intention)}" placeholder="Today, I want to…" autocomplete="off"></div>
+  ${taskCard(d)}
+  <div class="card"><label class="eyebrow" for="f-notes">Notes for today</label>
+    <textarea id="f-notes" data-field="notes" placeholder="Reminders, ideas, things to remember…">\n${esc(d.notes)}</textarea></div>
+  <div class="actions center">${d.phase === 'morning'
+    ? '<button class="btn" data-advance="day">Begin my day</button>'
+    : `<button class="btn" data-go="${backTarget(d)}">${backLabel(d)}</button>`}</div>
+  </section>`;
+}
+
+function feedHTML(d) {
+  if (!d.checkins.length) return '<p class="dim">Nothing logged yet. How is it going out there?</p>';
+  return `<ul class="feed">${[...d.checkins].reverse().map(c => `<li><time>${clock(c.ts)}</time><div class="what">${chipHTML(c.mood)}${c.text ? `<span class="pre">${esc(c.text)}</span>` : ''}</div><button class="x" data-act="delci" data-id="${c.id}" aria-label="Remove entry">×</button></li>`).join('')}</ul>`;
+}
+
+function dayScreen() {
+  const d = day();
+  return `<section class="scene">
+  ${hero('day', `Good day${greetName()}`, "Your morning is right here, with your list and a place to check in.")}
+  <div class="card"><div class="row"><div class="eyebrow">This morning</div><button class="link fine" data-go="morning">Edit</button></div>
+    ${d.intention.trim() ? `<p class="big">${esc(d.intention)}</p>` : ''}
+    ${d.journal.trim() ? `<p class="excerpt">${esc(d.journal)}</p>` : `<p class="dim">No morning pages yet. <button class="link" data-go="morning">Write some</button></p>`}
+    ${d.notes.trim() ? `<div class="eyebrow">Notes</div><p class="pre">${esc(d.notes)}</p>` : ''}</div>
+  ${taskCard(d)}
+  <div class="card"><div class="eyebrow">Check in</div>
+    <div class="moods" role="group" aria-label="How are you feeling?">${MOODS.map(m => `<button class="mood" style="--c:${m[2]}" data-mood="${m[0]}" aria-pressed="${mood === m[0]}"><i></i>${m[1]}</button>`).join('')}</div>
+    <form class="add" data-form="checkin"><input type="text" name="t" placeholder="A thought, a win, a moment…" autocomplete="off" aria-label="Note for the log"><button class="btn small" type="submit">Log</button></form>
+    <div id="feed">${feedHTML(d)}</div></div>
+  <div class="actions center">${d.phase === 'day'
+    ? '<button class="btn" data-advance="night">Wind down for the night</button>'
+    : `<button class="btn" data-go="${backTarget(d)}">${backLabel(d)}</button>`}</div>
+  </section>`;
+}
+
+function recapHTML(d) {
+  const total = d.tasks.length, done = d.tasks.filter(t => t.done).length;
+  const tasks = total ? `<div class="eyebrow">Your list: ${done} of ${total}</div><ul class="done-list">${d.tasks.map(t => `<li><span class="m">${t.done ? '✓' : '○'}</span><span class="${t.done ? 'on' : 'off'}">${esc(t.t)}</span></li>`).join('')}</ul>` : '';
+  const moods = d.checkins.filter(c => c.mood).map(c => chipHTML(c.mood)).join(' ');
+  const moments = d.checkins.filter(c => c.text);
+  return `${d.intention.trim() ? `<div class="eyebrow">Your intention</div><p class="big">${esc(d.intention)}</p>` : ''}
+    ${tasks}
+    ${moods ? `<div class="eyebrow">How you felt</div><div class="moods">${moods}</div>` : ''}
+    ${moments.length ? `<div class="eyebrow">Moments</div><ul class="done-list">${moments.map(c => `<li><span class="m">${clock(c.ts)}</span><span class="pre">${esc(c.text)}</span></li>`).join('')}</ul>` : ''}
+    ${d.notes.trim() ? `<div class="eyebrow">Notes from this morning</div><p class="pre">${esc(d.notes)}</p>` : ''}
+    ${!hasContent({ ...d, good: '', bedtime: '', nightJournal: '' }) ? '<p class="dim">A quiet day on the page. That counts too.</p>' : ''}`;
+}
+
+function nightScreen() {
+  const d = day();
+  return `<section class="scene">
+  ${hero('night', `Good evening${greetName()}`, 'Look back, set things down, and let the day close.')}
+  <div class="card"><div class="eyebrow">Today, at a glance</div>${recapHTML(d)}</div>
+  <div class="card"><label class="eyebrow" for="f-good">What went well</label>
+    <textarea id="f-good" data-field="good" placeholder="Big or tiny, name a few good things…">\n${esc(d.good)}</textarea></div>
+  <div class="card"><label class="eyebrow" for="f-bed">Bedtime notes</label>
+    <p class="dim">Anything still on your mind, or for tomorrow-you? Write it here so you can let it go.</p>
+    <textarea id="f-bed" data-field="bedtime" placeholder="Set it down…">\n${esc(d.bedtime)}</textarea></div>
+  <div class="card"><label class="eyebrow" for="f-night">Night pages</label>
+    <p class="prompt">${esc(promptFor(NIGHT_PROMPTS, today))}</p>
+    <textarea id="f-night" class="tall" data-field="nightJournal" placeholder="Write until you feel lighter…">\n${esc(d.nightJournal)}</textarea></div>
+  <div class="actions center">${d.phase !== 'done'
+    ? '<button class="btn" data-advance="done">Say goodnight</button>'
+    : '<button class="btn" data-go="asleep">Back to goodnight</button>'}</div>
+  </section>`;
+}
+
+function asleepScreen() {
+  const d = day(), s = streak();
+  return `<section class="scene center">
+  ${hero('asleep', 'Sleep well', 'Your day is tucked away. A fresh one begins at midnight.')}
+  <div class="card center"><div class="eyebrow">Tomorrow arrives in</div><p class="big" id="countdown">${countdown()}</p>
+    ${s > 1 ? `<p class="dim">${s} days in a row. Lovely.</p>` : ''}</div>
+  <div class="actions center"><button class="ghost" data-go="night">Revisit tonight's page</button><button class="ghost" data-go="history">Read your journal</button></div>
+  </section>`;
+}
+
+function countdown() {
+  const n = new Date(), m = new Date(n); m.setHours(24, 0, 0, 0);
+  const mins = Math.max(1, Math.round((m - n) / 60000));
+  return `${Math.floor(mins / 60)}h ${pad(mins % 60)}m`;
+}
+
+function welcomeScreen() {
+  return `<section class="scene">
+  ${hero('morning', 'Welcome', 'Three birds, one day: a morning to start it, a daytime to live it, a night to close it.')}
+  <div class="card"><h3>Here's how it works</h3>
+    <p><b>Morning:</b> write your pages, set an intention, make your list. The Bluebird keeps you company.</p>
+    <p><b>Day:</b> your morning stays close, you check things off and log how you're doing. The Cardinal cheers you on.</p>
+    <p><b>Night:</b> the Owl helps you look back, set things down and write before bed. Then the next day begins at midnight.</p>
+    <p class="dim">You move forward when you press the button. Tap any bird to hear it.</p></div>
+  <div class="card"><label class="eyebrow" for="f-name">What should the birds call you?</label>
+    <input type="text" id="f-name" value="${esc(db.settings.name)}" placeholder="Your name (optional)" autocomplete="off"></div>
+  <div class="actions center"><button class="btn" data-act="welcome">Begin</button></div>
+  </section>`;
+}
+
+function dots(d) {
+  const r = reach(d), full = d.phase === 'done';
+  return `<span class="dots" title="${full ? 'Day completed' : 'In progress'}">${[['#6fa8f0', hasAny(d, 'm')], ['#ee5a4b', hasAny(d, 'd')], ['#b7a2e6', hasAny(d, 'n')]].map(([c, on]) => `<i style="--c:${c}" class="${on ? '' : 'off'}"></i>`).join('')}</span>`;
+}
+function hasAny(d, p) {
+  if (p === 'm') return !!(d.journal.trim() || d.intention.trim() || d.notes.trim() || d.tasks.length);
+  if (p === 'd') return !!(d.checkins.length || d.tasks.some(t => t.done));
+  return !!(d.good.trim() || d.bedtime.trim() || d.nightJournal.trim());
+}
+const summaryOf = d => {
+  const bits = [];
+  if (d.intention.trim()) bits.push(d.intention.trim());
+  else if (d.journal.trim()) bits.push(d.journal.trim().replace(/\s+/g, ' ').slice(0, 90));
+  if (d.tasks.length) bits.push(`${d.tasks.filter(t => t.done).length}/${d.tasks.length} tasks`);
+  return bits.join(' · ');
+};
+
+let query = '';
+const matches = (d, q) => !q || JSON.stringify([d.journal, d.intention, d.notes, d.tasks.map(t => t.t), d.checkins.map(c => c.text), d.good, d.bedtime, d.nightJournal]).toLowerCase().includes(q);
+function historyListHTML() {
+  const q = query.trim().toLowerCase();
+  const keys = Object.keys(db.days).filter(k => hasContent(db.days[k]) && matches(db.days[k], q)).sort().reverse();
+  if (!keys.length) return `<p class="dim">${q ? 'No pages match that.' : 'Nothing here yet. Your first day will appear after you write something.'}</p>`;
+  return keys.map(k => `<button class="hist" data-act="open" data-day="${k}"><span class="d">${esc(shortDate(k))}${k === today ? ' · today' : ''}</span>${dots(db.days[k])}<span class="s">${esc(summaryOf(db.days[k]))}</span></button>`).join('');
+}
+function historyScreen() {
+  const all = Object.keys(db.days).filter(k => hasContent(db.days[k]));
+  const words = all.reduce((a, k) => { const d = db.days[k]; return a + [d.journal, d.notes, d.good, d.bedtime, d.nightJournal].join(' ').split(/\s+/).filter(Boolean).length; }, 0);
+  return `<section class="scene">
+  <header class="hero"><p class="eyebrow">Your journal</p><h1>Past days</h1></header>
+  <div class="card"><div class="stats"><div><strong>${all.length}</strong><span class="fine">days written</span></div><div><strong>${streak()}</strong><span class="fine">day streak</span></div><div><strong>${words.toLocaleString()}</strong><span class="fine">words</span></div></div></div>
+  <input type="text" class="search" id="q" value="${esc(query)}" placeholder="Search your pages" aria-label="Search your pages" autocomplete="off">
+  <div class="stack" id="hist-list">${historyListHTML()}</div>
+  </section>`;
+}
+
+let openDay = '';
+function entryScreen() {
+  const d = db.days[openDay];
+  if (!d) return historyScreen();
+  const sec = (label, body) => body ? `<div><div class="eyebrow">${label}</div>${body}</div>` : '';
+  const text = (t, cls = 'pre') => t.trim() ? `<p class="${cls}">${esc(t)}</p>` : '';
+  const tasks = d.tasks.length ? `<ul class="done-list">${d.tasks.map(t => `<li><span class="m">${t.done ? '✓' : '○'}</span><span class="${t.done ? 'on' : 'off'}">${esc(t.t)}</span></li>`).join('')}</ul>` : '';
+  const log = d.checkins.length ? `<ul class="feed">${d.checkins.map(c => `<li><time>${clock(c.ts)}</time><div class="what">${chipHTML(c.mood)}${c.text ? `<span class="pre">${esc(c.text)}</span>` : ''}</div><span></span></li>`).join('')}</ul>` : '';
+  const block = (title, color, parts) => parts.some(Boolean) ? `<div class="card"><div class="row"><h3>${title}</h3><span class="dots"><i style="--c:${color}"></i></span></div>${parts.join('')}</div>` : '';
+  return `<section class="scene">
+  <header class="hero"><p class="eyebrow">${esc(longDate(openDay))}</p><h1>${esc(shortDate(openDay))}</h1></header>
+  ${block('Morning', '#6fa8f0', [sec('Intention', text(d.intention, 'big')), sec('Morning pages', text(d.journal)), sec('Notes', text(d.notes))])}
+  ${block('Day', '#ee5a4b', [sec('Checklist', tasks), sec('Check-ins', log)])}
+  ${block('Night', '#b7a2e6', [sec('What went well', text(d.good)), sec('Bedtime notes', text(d.bedtime)), sec('Night pages', text(d.nightJournal))])}
+  <div class="actions center"><button class="btn" data-go="history">Back to all days</button>${openDay === today ? '<button class="ghost" data-go="home">Go to today</button>' : ''}</div>
+  </section>`;
+}
+
+function settingsScreen() {
+  return `<section class="scene">
+  <header class="hero"><p class="eyebrow">Settings</p><h1>About you</h1></header>
+  <div class="card"><label class="eyebrow" for="f-name">What the birds call you</label>
+    <input type="text" id="f-name" value="${esc(db.settings.name)}" placeholder="Your name (optional)" autocomplete="off"></div>
+  <div class="card"><div class="eyebrow">Your pages</div>
+    <p class="dim">Everything is saved on this device only. Download a backup now and then, and restore it on a new phone or browser.</p>
+    <div class="actions"><button class="btn small" data-act="export">Download backup</button><button class="btn small" data-act="import">Restore backup</button></div>
+    <input type="file" id="f-import" accept="application/json,.json" hidden>
+    <p class="fine" id="settings-msg" role="status"></p></div>
+  <div class="card"><div class="eyebrow">How it works</div>
+    <p class="dim">The day moves forward only when you press the button: Begin my day, Wind down, Say goodnight. At midnight a new day begins, whatever happened, and yesterday is kept under Journal. You can always go back and edit earlier parts of today.</p></div>
+  <div class="actions center"><button class="btn" data-go="home">Back to today</button></div>
+  </section>`;
+}
+
+const SCREENS = { welcome: welcomeScreen, morning: morningScreen, day: dayScreen, night: nightScreen, asleep: asleepScreen, history: historyScreen, entry: entryScreen, settings: settingsScreen };
+
+/* ---------- render ---------- */
+function render() {
+  const d = day();
+  const sky = ['history', 'entry', 'settings', 'asleep'].includes(view) ? 'night' : view === 'welcome' ? 'morning' : view;
+  document.body.dataset.sky = sky;
+  const nav = $('#nav');
+  const showNav = ['morning', 'day', 'night', 'asleep'].includes(view);
+  nav.hidden = !showNav;
+  if (showNav) {
+    const r = reach(d), cur = view === 'asleep' ? 'night' : view;
+    nav.innerHTML = [['morning', 'Morning', '#6fa8f0'], ['day', 'Day', '#ee5a4b'], ['night', 'Night', '#b7a2e6']].map(([id, label, c], i) =>
+      `<button class="phase" style="--c:${c}" data-go="${id === 'night' && d.phase === 'done' ? 'asleep' : id}" ${i > r ? 'disabled' : ''} ${id === cur ? 'aria-current="page"' : ''}><i></i>${label}</button>`).join('');
+  }
+  $('#b-hist').textContent = view === 'history' || view === 'entry' ? 'Today' : 'Journal';
+  $('#b-hist').dataset.go = view === 'history' || view === 'entry' ? 'home' : 'history';
+  $('#stage').innerHTML = SCREENS[view]();
+  $('.app').scrollTop = 0;
+  lineIx = 0;
+  paintSky();
+}
+
+function home() { const d = day(); return !db.settings.welcomed ? 'welcome' : d.phase === 'done' ? 'asleep' : d.phase; }
+function go(v) {
+  if (v === 'home') v = home();
+  if (v === 'night' && day().phase === 'done' && view === 'asleep') v = 'night';
+  view = v; render();
+}
+function advance(to) {
+  const d = day();
+  const order = ['morning', 'day', 'night', 'done'];
+  if (order.indexOf(to) <= order.indexOf(d.phase)) return go(to === 'done' ? 'asleep' : to);
+  d.phase = to;
+  if (to === 'done') d.finishedAt = Date.now();
+  flush();
+  view = to === 'done' ? 'asleep' : to;
+  render();
+}
+
+/* ---------- events ---------- */
+const stage = $('#stage');
+document.addEventListener('click', e => {
+  const bird = e.target.closest('[data-bird]');
+  if (bird) return tapBird(bird);
+  const mo = e.target.closest('[data-mood]');
+  if (mo) { mood = mood === mo.dataset.mood ? '' : mo.dataset.mood; stage.querySelectorAll('[data-mood]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mood === mood)); return; }
+  const adv = e.target.closest('[data-advance]');
+  if (adv) return advance(adv.dataset.advance);
+  const g = e.target.closest('[data-go]');
+  if (g) return go(g.dataset.go);
+  const a = e.target.closest('[data-act]');
+  if (!a) return;
+  const d = day();
+  switch (a.dataset.act) {
+    case 'toggle': { const t = d.tasks.find(t => t.id === a.dataset.id); if (t) { t.done = !t.done; flush(); $('#tasks-wrap').innerHTML = tasksHTML(d); } break; }
+    case 'deltask': d.tasks = d.tasks.filter(t => t.id !== a.dataset.id); flush(); $('#tasks-wrap').innerHTML = tasksHTML(d); break;
+    case 'delci': d.checkins = d.checkins.filter(c => c.id !== a.dataset.id); flush(); $('#feed').innerHTML = feedHTML(d); break;
+    case 'open': openDay = a.dataset.day; view = 'entry'; render(); break;
+    case 'welcome': { const n = $('#f-name'); db.settings.name = n ? n.value.trim() : ''; db.settings.welcomed = true; flush(); view = home(); render(); break; }
+    case 'export': exportData(); break;
+    case 'import': $('#f-import').click(); break;
+  }
+});
+document.addEventListener('input', e => {
+  const f = e.target.dataset && e.target.dataset.field;
+  if (f) { day()[f] = e.target.value; save(); return; }
+  if (e.target.id === 'f-name' && view === 'settings') { db.settings.name = e.target.value.trim(); save(); }
+  if (e.target.id === 'q') { query = e.target.value; $('#hist-list').innerHTML = historyListHTML(); }
+});
+document.addEventListener('submit', e => {
+  const form = e.target.closest('[data-form]'); if (!form) return;
+  e.preventDefault();
+  const input = form.elements.t, text = input.value.trim(), d = day();
+  if (form.dataset.form === 'task') {
+    if (!text) return;
+    d.tasks.push({ id: uid(), t: text, done: false }); flush();
+    $('#tasks-wrap').innerHTML = tasksHTML(d); input.value = ''; input.focus();
+  } else if (form.dataset.form === 'checkin') {
+    if (!text && !mood) return;
+    d.checkins.push({ id: uid(), ts: Date.now(), mood, text }); flush();
+    mood = ''; input.value = ''; $('#feed').innerHTML = feedHTML(d);
+    stage.querySelectorAll('[data-mood]').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  }
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'f-import' && e.target.files[0]) importData(e.target.files[0]);
+});
+
+function tapBird(btn) {
+  const kind = btn.dataset.bird, b = BIRDS[kind];
+  lineIx = (lineIx + 1) % b.lines.length;
+  $('#bubble').textContent = b.lines[lineIx];
+  btn.classList.remove('hop'); void btn.offsetWidth; btn.classList.add('hop');
+  const pop = document.createElement('span');
+  pop.className = 'note-pop'; pop.textContent = kind === 'asleep' ? 'z' : '♪';
+  pop.style.left = (40 + Math.random() * 50) + '%'; pop.style.top = '14%';
+  btn.parentElement.appendChild(pop); setTimeout(() => pop.remove(), 1500);
+  voice(kind);
+}
+
+function exportData() {
+  flush();
+  const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `journalbird-backup-${dayKey()}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  $('#settings-msg').textContent = 'Backup downloaded.';
+}
+function importData(file) {
+  const msg = $('#settings-msg');
+  file.text().then(txt => {
+    const inc = JSON.parse(txt);
+    if (!inc || typeof inc.days !== 'object') throw new Error('bad');
+    let added = 0;
+    for (const k of Object.keys(inc.days)) {
+      const cur = db.days[k];
+      if (!cur || !hasContent(cur)) { db.days[k] = { ...blank(), ...inc.days[k] }; added++; }
+    }
+    if (inc.settings && inc.settings.name && !db.settings.name) db.settings.name = inc.settings.name;
+    flush();
+    msg.textContent = added ? `Restored ${added} day${added > 1 ? 's' : ''}. Days you already have were left alone.` : 'Nothing new to restore: you already have those days.';
+  }).catch(() => { msg.textContent = "That file doesn't look like a JournalBird backup."; });
+}
+
+/* ---------- midnight rollover ---------- */
+function tick() {
+  const k = dayKey();
+  if (k !== today) {
+    flush(); today = k; mood = ''; view = home(); render();
+  }
+  const c = $('#countdown'); if (c) c.textContent = countdown();
+}
+setInterval(tick, 15000);
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); else tick(); });
+addEventListener('focus', tick);
+addEventListener('pagehide', flush);
+
+/* ---------- motes and stars ---------- */
+const cv = $('#motes'), cx = cv.getContext('2d');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W = 0, H = 0, nightF = 0;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const motes = Array.from({ length: 36 }, () => ({ x: Math.random(), y: Math.random(), r: rnd(0.8, 2.4), s: rnd(0.4, 1), ph: rnd(0, 6.28) }));
+const stars = Array.from({ length: 80 }, () => ({ x: Math.random(), y: Math.random() * 0.7, r: rnd(0.4, 1.4), ph: rnd(0, 6.28) }));
+function fit() { const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+addEventListener('resize', () => { fit(); paintSky(); });
+fit();
+let last = 0;
+function paintSky(t = 0) {
+  const sky = document.body.dataset.sky, dt = Math.min(50, t - last || 16); last = t;
+  nightF += ((sky === 'night' ? 1 : 0) - nightF) * (reduce ? 1 : 0.025);
+  cx.clearRect(0, 0, W, H);
+  for (const s of stars) {
+    const a = nightF * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t / 800 + s.ph)));
+    if (a < 0.02) continue;
+    cx.fillStyle = `rgba(255,248,230,${a})`; cx.beginPath(); cx.arc(s.x * W, s.y * H, s.r, 0, 6.283); cx.fill();
+  }
+  const col = sky === 'night' ? '255,236,140' : sky === 'day' ? '255,255,255' : '255,222,166';
+  for (const m of motes) {
+    if (sky === 'night') { m.x += Math.sin(t / 2600 + m.ph) * 0.00012 * dt; m.y += Math.cos(t / 3100 + m.ph) * 0.00008 * dt; }
+    else if (sky === 'day') { m.x += m.s * 0.00006 * dt; m.y += Math.sin(t / 2000 + m.ph) * 0.00003 * dt; }
+    else m.y -= m.s * 0.00004 * dt;
+    if (m.y < -0.02) m.y = 1.02; if (m.y > 1.02) m.y = -0.02; if (m.x > 1.02) m.x = -0.02; if (m.x < -0.02) m.x = 1.02;
+    const pulse = sky === 'night' ? 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(t / 700 + m.ph * 3)) : 0.55;
+    const a = (sky === 'day' ? 0.35 : 0.7) * pulse;
+    const g = cx.createRadialGradient(m.x * W, m.y * H, 0, m.x * W, m.y * H, m.r * 5);
+    g.addColorStop(0, `rgba(${col},${a})`); g.addColorStop(1, `rgba(${col},0)`);
+    cx.fillStyle = g; cx.beginPath(); cx.arc(m.x * W, m.y * H, m.r * 5, 0, 6.283); cx.fill();
+  }
+}
+if (!reduce) { const loop = t => { paintSky(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+
+/* ---------- go ---------- */
+view = home();
+render();
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
