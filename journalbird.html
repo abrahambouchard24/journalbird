@@ -3,100 +3,57 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Spectral:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@400;500&display=swap">
 <style>
-/* Layout: a single centered column over a sky that follows the bird you're with: bluebird dawn, cardinal daylight, owl night. */
+/* Layout: one centered column on plain paper. White with black ink by day, black with white ink by night; the birds are two-tone line art in the same ink. */
 :root {
-  --night: #0e0b1c;
-  --dusk: #261733;
-  --gold: #f4c46a;
-  --bone: #f4ede3;
-  --ash: #a99fbb;
-  --line: rgba(244, 237, 227, 0.18);
-  --field: rgba(244, 237, 227, 0.07);
-  --card: rgba(16, 11, 36, 0.48);
-  --accent: #8fc3ff;
+  --paper: #ffffff;
+  --ink: #111111;
+  --ash: #6b6b6b;
+  --line: rgba(17, 17, 17, 0.16);
+  --field: rgba(17, 17, 17, 0.04);
   --display: "Marcellus", "Trajan Pro", Georgia, serif;
   --body: "Spectral", Georgia, "Times New Roman", serif;
   --label: "Jost", "Futura", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+body[data-sky="night"] {
+  --paper: #000000;
+  --ink: #f5f5f5;
+  --ash: #9b9b9b;
+  --line: rgba(255, 255, 255, 0.22);
+  --field: rgba(255, 255, 255, 0.06);
   color-scheme: dark;
 }
-body[data-sky="morning"] { --accent: #8fc3ff; }
-body[data-sky="day"] { --accent: #ff9a80; }
-body[data-sky="night"] { --accent: #f4c46a; --hb: #1c1740; --hf: #120e2b; }
-body[data-sky="morning"] { --hb: #4d3b7d; --hf: #2f2457; }
-body[data-sky="day"] { --hb: #4f9a6a; --hf: #356f50; }
+html { background: #fff; }
+html:has(body[data-sky="night"]) { background: #000; }
 html, body { height: 100%; }
 body {
   margin: 0;
-  background: var(--night);
-  color: var(--bone);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--body);
   font-size: 18px;
   line-height: 1.6;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
-
-/* Sky */
-.sky, .sky > * { position: fixed; inset: 0; pointer-events: none; }
-.sky .layer { transition: opacity 2.4s ease; opacity: 0; }
-.sky .l-morning { background:
-  radial-gradient(90% 50% at 50% 100%, rgba(255,214,150,0.85) 0%, rgba(255,160,130,0.45) 40%, rgba(255,160,130,0) 75%),
-  linear-gradient(to top, #ffb98a 0%, #f08fa0 24%, #9a6bb8 55%, #3c4a96 100%); }
-.sky .l-day { background: linear-gradient(to top, #ffe3a3 0%, #9fd2f2 34%, #54a0e0 70%, #2c62b0 100%); }
-.sky .l-night { background:
-  radial-gradient(120% 70% at 50% 110%, #3a2358 0%, rgba(58,35,88,0) 60%),
-  linear-gradient(to top, #261733 0%, #17123a 50%, #0b0919 100%); }
-body[data-sky="morning"] .l-morning, body[data-sky="day"] .l-day, body[data-sky="night"] .l-night { opacity: 1; }
-#motes { width: 100%; height: 100%; }
-
-.sun {
-  inset: auto; width: min(46vw, 210px); aspect-ratio: 1; border-radius: 50%;
-  background: radial-gradient(circle, #fffbe6 0%, #ffe29a 26%, rgba(255,200,110,0.55) 46%, rgba(255,190,100,0) 70%);
-  transform: translate(-50%, -50%); left: 50%; top: 84%; opacity: 0;
-  transition: left 2.4s ease, top 2.4s ease, opacity 2.4s ease;
-}
-body[data-sky="morning"] .sun { opacity: 1; left: 50%; top: 80%; }
-body[data-sky="day"] .sun { opacity: 1; left: 80%; top: 12%; }
-.moon {
-  inset: auto; right: 13%; top: 8%; width: 84px; height: 84px; border-radius: 50%;
-  background:
-    radial-gradient(circle at 64% 62%, rgba(176,156,118,0.4) 0 9%, transparent 10%),
-    radial-gradient(circle at 32% 70%, rgba(176,156,118,0.32) 0 6%, transparent 7%),
-    radial-gradient(circle at 38% 30%, rgba(176,156,118,0.28) 0 5%, transparent 6%),
-    radial-gradient(circle at 36% 34%, #fffaf0, #f2e6c8 60%, #d8c9a4);
-  box-shadow: 0 0 50px 12px rgba(255,244,214,0.35), 0 0 150px 54px rgba(190,170,255,0.14);
-  opacity: 0; transform: translateY(40px);
-  transition: opacity 2.4s ease, transform 2.4s ease;
-}
-body[data-sky="night"] .moon { opacity: 1; transform: none; }
-.cloud { inset: auto; width: 190px; color: #fff; opacity: 0; filter: blur(1.2px); transition: opacity 2.4s ease, color 2.4s ease; animation: drift 140s linear infinite alternate; }
-.cloud.c1 { top: 16%; }
-.cloud.c2 { top: 34%; width: 140px; animation-duration: 190s; animation-delay: -60s; }
-.cloud.c3 { top: 8%; width: 230px; animation-duration: 240s; animation-delay: -120s; }
-body[data-sky="morning"] .cloud { opacity: 0.4; color: #ffd8d0; }
-body[data-sky="day"] .cloud { opacity: 0.85; color: #fff; }
-@keyframes drift { from { transform: translateX(-35vw); } to { transform: translateX(110vw); } }
-.hills { inset: auto; left: 0; right: 0; bottom: 0; width: 100%; height: 24vh; min-height: 120px; }
-.hills .hb { fill: var(--hb); transition: fill 2.4s ease; }
-.hills .hf { fill: var(--hf); transition: fill 2.4s ease; }
+::selection { background: var(--ink); color: var(--paper); }
 
 /* App frame */
-.app { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; padding-inline: 16px; overflow-y: auto; }
+.app { position: relative; height: 100%; display: flex; flex-direction: column; padding-inline: 16px; overflow-y: auto; }
 .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 16px 4px; width: 100%; max-width: 40rem; margin-inline: auto; }
-.wordmark { font-family: var(--display); letter-spacing: 0.4em; font-size: 0.78rem; color: var(--bone); background: none; border: none; padding: 6px 0; text-shadow: 0 1px 12px rgba(0,0,0,0.35); }
+.wordmark { font-family: var(--display); letter-spacing: 0.4em; font-size: 0.78rem; color: var(--ink); background: none; border: none; padding: 6px 0; }
 .top-links { display: flex; gap: 6px; }
 .stage { flex: 1; width: 100%; max-width: 36rem; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; padding-block: 14px 56px; min-width: 0; }
-.scene { display: flex; flex-direction: column; gap: 18px; animation: rise 0.9s cubic-bezier(.2,.7,.2,1) both; }
-@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.scene { display: flex; flex-direction: column; gap: 18px; animation: rise 0.8s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 .eyebrow { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ash); }
-.hero .eyebrow { color: rgba(244,237,227,0.82); text-shadow: 0 1px 10px rgba(0,0,0,0.4); }
 h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; line-height: 1.15; }
-h1 { font-size: clamp(2.2rem, 8vw, 3.2rem); letter-spacing: 0.05em; text-shadow: 0 2px 24px rgba(0,0,0,0.35); }
+h1 { font-size: clamp(2.2rem, 8vw, 3.2rem); letter-spacing: 0.05em; }
 h2 { font-size: clamp(1.4rem, 5vw, 1.8rem); }
 h3 { font-size: 1.15rem; }
 p { margin: 0; }
-.lede { color: rgba(244,237,227,0.88); font-size: 1.02rem; max-width: 30rem; text-shadow: 0 1px 12px rgba(0,0,0,0.4); }
+.lede { color: var(--ash); font-size: 1.02rem; max-width: 30rem; }
 .dim { color: var(--ash); font-style: italic; font-size: 0.98rem; }
 .fine { font-family: var(--label); font-size: 0.75rem; letter-spacing: 0.06em; color: var(--ash); }
 .center { text-align: center; align-items: center; }
@@ -104,7 +61,12 @@ p { margin: 0; }
 /* Hero + birds */
 .hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
 .bird { background: none; border: none; padding: 0; display: grid; place-items: center; cursor: pointer; }
-.bird svg { width: min(300px, 78vw); height: auto; overflow: visible; filter: drop-shadow(0 10px 22px rgba(0,0,0,0.3)); }
+.bird svg { width: min(280px, 74vw); height: auto; overflow: visible; }
+.bk { fill: var(--ink); stroke: none; }
+.wh { fill: var(--paper); stroke: none; }
+.ol { fill: var(--paper); stroke: var(--ink); stroke-width: 2.6; stroke-linejoin: round; }
+.ln { fill: none; stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.lw { fill: none; stroke: var(--paper); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .bird .bob { animation: bob 4.5s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translateY(-3px); } }
 .bird .head { animation: tilt 9s ease-in-out infinite; }
@@ -120,89 +82,90 @@ p { margin: 0; }
 .owl.asleep .open { display: none; }
 .owl.asleep .owl-all { animation: breathe 5s ease-in-out infinite; }
 @keyframes breathe { 50% { transform: scale(1.025, 1.035); } }
-.z { font-family: var(--display); fill: #e8defa; opacity: 0; animation: zee 4.5s ease-in-out infinite; }
+.z { font-family: var(--display); fill: var(--ink); opacity: 0; animation: zee 4.5s ease-in-out infinite; }
 .z.z2 { animation-delay: 1.5s; }
 .owl:not(.asleep) .z { display: none; }
 @keyframes zee { 0% { opacity: 0; transform: translate(0, 8px); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translate(10px, -20px); } }
-.note-pop { position: absolute; pointer-events: none; font-size: 1.4rem; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.4); animation: floatup 1.4s ease-out forwards; }
+.note-pop { position: absolute; pointer-events: none; font-size: 1.4rem; color: var(--ink); animation: floatup 1.4s ease-out forwards; }
 @keyframes floatup { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-60px); } }
 .bird-wrap { position: relative; }
-.bubble { position: relative; max-width: 21rem; padding: 10px 16px; border-radius: 16px; background: rgba(244,237,227,0.93); color: #2a2236; font-style: italic; font-size: 1rem; line-height: 1.4; box-shadow: 0 6px 24px rgba(0,0,0,0.22); }
-.bubble::before { content: ""; position: absolute; top: -7px; left: 50%; margin-left: -7px; border: 7px solid transparent; border-top: 0; border-bottom-color: rgba(244,237,227,0.93); }
+.bubble { position: relative; max-width: 21rem; padding: 9px 16px; border: 1px solid var(--ink); border-radius: 18px; background: var(--paper); color: var(--ink); font-style: italic; font-size: 1rem; line-height: 1.4; }
+.bubble::before { content: ""; position: absolute; top: -7px; left: 50%; margin-left: -6px; width: 11px; height: 11px; background: var(--paper); border-left: 1px solid var(--ink); border-top: 1px solid var(--ink); transform: rotate(45deg); }
 
 /* Phase nav */
 .phases { display: flex; gap: 6px; margin: 6px auto 0; max-width: 26rem; width: 100%; }
-.phase { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--label); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 9px 6px; border-radius: 999px; border: 1px solid var(--line); background: rgba(16,11,36,0.32); color: rgba(244,237,227,0.75); transition: border-color 0.3s, background 0.3s; }
-.phase i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
-.phase[aria-current="page"] { color: var(--bone); border-color: var(--c); background: rgba(16,11,36,0.6); }
-.phase:disabled { opacity: 0.45; cursor: default; }
+.phase { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--label); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 9px 6px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--ash); }
+.phase i { width: 8px; height: 8px; border-radius: 50%; border: 1px solid currentColor; flex: none; }
+.phase[aria-current="page"] { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+.phase[aria-current="page"] i { background: var(--paper); border-color: var(--paper); }
+.phase:disabled { opacity: 0.4; cursor: default; }
 
 /* Cards and controls */
-.card { background: var(--card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 20px; padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card { border: 1px solid var(--line); border-radius: 8px; padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .card .prompt { font-family: var(--display); font-size: 1.2rem; line-height: 1.3; }
 button { font: inherit; color: inherit; cursor: pointer; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .center .actions, .actions.center { justify-content: center; }
-.btn { font-family: var(--label); font-size: 0.82rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 15px 26px; border-radius: 999px; border: 1px solid var(--accent); background: linear-gradient(180deg, rgba(244,237,227,0.16), rgba(244,237,227,0.05)); background-color: rgba(16,11,36,0.5); color: var(--bone); transition: background-color 0.3s, transform 0.2s, opacity 0.3s; }
-.btn:hover { background-color: rgba(16,11,36,0.25); }
+.btn { font-family: var(--label); font-size: 0.82rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 15px 28px; border-radius: 999px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); transition: background-color 0.3s, color 0.3s, border-color 0.6s, transform 0.2s, opacity 0.3s; }
+.btn:hover { background: transparent; color: var(--ink); }
 .btn:active { transform: scale(0.98); }
 .btn:disabled { opacity: 0.4; cursor: default; }
 .btn.small { padding: 11px 18px; font-size: 0.72rem; }
-.ghost { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; background: none; border: none; color: rgba(244,237,227,0.8); padding: 10px 6px; text-shadow: 0 1px 10px rgba(0,0,0,0.4); }
-.ghost:hover { color: #fff; }
-.link { background: none; border: none; padding: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
-input[type="text"], textarea { width: 100%; font: inherit; font-size: 1.05rem; color: var(--bone); background: var(--field); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; resize: vertical; box-sizing: border-box; }
+.ghost { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; background: none; border: none; color: var(--ash); padding: 10px 6px; }
+.ghost:hover { color: var(--ink); }
+.link { background: none; border: none; padding: 0; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; font: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+input[type="text"], textarea { width: 100%; font: inherit; font-size: 1.05rem; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; resize: vertical; box-sizing: border-box; }
 textarea { min-height: 7rem; line-height: 1.55; }
 textarea.tall { min-height: 11rem; }
-input::placeholder, textarea::placeholder { color: rgba(169,159,187,0.7); font-style: italic; }
-input:focus, textarea:focus { outline: none; border-color: var(--accent); background: rgba(244,237,227,0.1); }
+input::placeholder, textarea::placeholder { color: var(--ash); font-style: italic; opacity: 0.8; }
+input:focus, textarea:focus { outline: none; border-color: var(--ink); }
 
 /* Tasks */
-.bar { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; }
-.bar span { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s ease; }
+.bar { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--ink); border-radius: 3px; transition: width 0.5s ease; }
 .progress { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
 .tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .task { display: flex; align-items: center; gap: 12px; padding-block: 9px; border-top: 1px solid var(--line); }
 .task:first-child { border-top: none; }
 .task span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.check { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--accent); background: transparent; flex: none; display: grid; place-items: center; padding: 0; transition: background 0.25s; }
-.task.done .check { background: var(--accent); }
-.task.done .check::after { content: ""; width: 7px; height: 12px; border: solid #1a1426; border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+.check { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--ink); background: transparent; flex: none; display: grid; place-items: center; padding: 0; }
+.task.done .check { background: var(--ink); }
+.task.done .check::after { content: ""; width: 7px; height: 12px; border: solid var(--paper); border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
 .task.done span { text-decoration: line-through; color: var(--ash); }
 .x { background: none; border: none; color: var(--ash); font-size: 1.4rem; line-height: 1; padding: 4px 8px; }
-.x:hover { color: var(--bone); }
+.x:hover { color: var(--ink); }
 .add { display: flex; gap: 10px; }
 .add input { flex: 1; }
 
 /* Check-ins */
 .moods { display: flex; flex-wrap: wrap; gap: 8px; }
-.mood { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--field); color: var(--bone); display: inline-flex; align-items: center; gap: 7px; }
-.mood i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
-.mood[aria-pressed="true"] { border-color: var(--c); background: rgba(244,237,227,0.14); }
+.mood { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--ink); }
+.mood i { display: none; }
+.mood[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .feed li { display: grid; grid-template-columns: 4.6rem 1fr auto; gap: 10px; align-items: start; padding-block: 10px; border-top: 1px solid var(--line); }
 .feed time { font-family: var(--label); font-size: 0.72rem; letter-spacing: 0.1em; color: var(--ash); padding-top: 4px; }
 .feed .what { min-width: 0; display: flex; flex-direction: column; gap: 4px; overflow-wrap: anywhere; }
-.chip { align-self: flex-start; font-family: var(--label); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--c, var(--line)); color: var(--bone); }
-.excerpt { white-space: pre-wrap; overflow-wrap: anywhere; font-style: italic; font-weight: 300; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; border-left: 1px solid var(--accent); padding-left: 14px; }
+.chip { align-self: flex-start; font-family: var(--label); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--ink); color: var(--ink); }
+.excerpt { white-space: pre-wrap; overflow-wrap: anywhere; font-style: italic; font-weight: 300; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; border-left: 1px solid var(--ink); padding-left: 14px; }
 .big { font-family: var(--display); font-size: 1.35rem; line-height: 1.3; overflow-wrap: anywhere; }
 .pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 .done-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .done-list li { display: flex; gap: 10px; align-items: baseline; overflow-wrap: anywhere; }
-.done-list .m { font-family: var(--label); color: var(--accent); flex: none; }
-.done-list .off { color: var(--ash); }
+.done-list .m { font-family: var(--label); color: var(--ink); flex: none; }
+.done-list .off { color: var(--ink); }
 .done-list .on { text-decoration: line-through; color: var(--ash); }
 .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 
 /* History */
-.hist { text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 16px 18px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); width: 100%; }
-.hist:hover { border-color: var(--accent); }
+.hist { text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 16px 18px; border-radius: 8px; border: 1px solid var(--line); background: none; width: 100%; }
+.hist:hover { border-color: var(--ink); }
 .hist .d { font-family: var(--display); font-size: 1.15rem; }
 .hist .s { color: var(--ash); font-style: italic; overflow-wrap: anywhere; grid-column: 1 / -1; }
 .dots { display: flex; gap: 6px; align-items: center; }
-.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
-.dots i.off { background: transparent; border: 1px solid var(--line); }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); border: 1px solid var(--ink); }
+.dots i.off { background: transparent; border-color: var(--line); }
 .stack { display: flex; flex-direction: column; gap: 10px; }
 .stats { display: flex; gap: 22px; flex-wrap: wrap; }
 .stats div { display: flex; flex-direction: column; }
@@ -214,23 +177,6 @@ input:focus, textarea:focus { outline: none; border-color: var(--accent); backgr
   .scene { opacity: 1; }
 }
 </style>
-
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <symbol id="cloud" viewBox="0 0 120 50"><path d="M20 44 C6 44 2 30 14 26 C14 14 30 10 38 18 C42 6 66 4 74 16 C86 8 106 14 104 30 C116 30 118 44 102 44 Z" fill="currentColor"/></symbol>
-</defs></svg>
-
-<div class="sky" aria-hidden="true">
-  <div class="layer l-morning"></div><div class="layer l-day"></div><div class="layer l-night"></div>
-  <div class="sun"></div><div class="moon"></div>
-  <svg class="cloud c1" viewBox="0 0 120 50"><use href="#cloud"/></svg>
-  <svg class="cloud c2" viewBox="0 0 120 50"><use href="#cloud"/></svg>
-  <svg class="cloud c3" viewBox="0 0 120 50"><use href="#cloud"/></svg>
-  <canvas id="motes"></canvas>
-  <svg class="hills" viewBox="0 0 400 120" preserveAspectRatio="none">
-    <path class="hb" d="M0 60 C60 28 120 36 180 56 S320 74 400 34 L400 120 L0 120Z"/>
-    <path class="hf" d="M0 86 C70 62 140 70 210 88 S340 100 400 70 L400 120 L0 120Z"/>
-  </svg>
-</div>
 
 <div class="app">
   <div class="topbar">
@@ -291,85 +237,64 @@ const streak = () => {
 const greetName = () => db.settings.name ? `, ${esc(db.settings.name)}` : '';
 
 /* ---------- the birds ---------- */
-const branch = (dk, lt, a, b) => `
-<path d="M-4 174 C50 164 112 178 168 170 S238 162 264 168" fill="none" stroke="${dk}" stroke-width="10" stroke-linecap="round"/>
-<path d="M-4 171 C50 161 112 175 168 167 S238 159 264 165" fill="none" stroke="${lt}" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
-<path d="M206 166 C214 146 236 142 250 148 C244 164 228 170 206 166Z" fill="${a}"/>
-<path d="M206 166 C220 158 232 154 246 150" stroke="${b}" stroke-width="1.6" fill="none"/>
-<path d="M30 172 C28 154 12 148 0 152 C6 166 18 174 30 172Z" fill="${b}"/>
-<path d="M62 170 C70 156 84 154 94 158 C88 168 76 172 62 170Z" fill="${a}"/>`;
+const branch = (leafSolid) => `
+<path class="ln" stroke-width="6" d="M-4 174 C50 164 112 178 168 170 S238 162 264 168"/>
+<path class="${leafSolid ? 'bk' : 'ol'}" d="M206 166 C214 146 236 142 250 148 C244 164 228 170 206 166Z"/>
+<path class="${leafSolid ? 'lw' : 'ln'}" stroke-width="1.6" d="M206 166 C220 158 232 154 246 150"/>
+<path class="${leafSolid ? 'bk' : 'ol'}" d="M30 172 C28 154 12 148 0 152 C6 166 18 174 30 172Z"/>
+<path class="${leafSolid ? 'bk' : 'ol'}" d="M62 170 C70 156 84 154 94 158 C88 168 76 172 62 170Z"/>`;
 
 const bluebird = () => `<svg viewBox="0 0 260 200" role="img" aria-label="A bluebird on a branch">
-<defs>
- <linearGradient id="bbB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fb6f5"/><stop offset="1" stop-color="#3b6fc6"/></linearGradient>
- <linearGradient id="bbR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6b57f"/><stop offset="1" stop-color="#e9895a"/></linearGradient>
- <radialGradient id="bbG"><stop offset="0" stop-color="#ffe2b0" stop-opacity=".55"/><stop offset="1" stop-color="#ffe2b0" stop-opacity="0"/></radialGradient>
-</defs>
-<circle cx="128" cy="112" r="96" fill="url(#bbG)"/>
-${branch('#5b3f30', '#8a6650', '#66a980', '#4c8a68')}
+${branch(false)}
 <g class="bob">
- <path d="M168 128 L228 156 L216 168 L158 150Z" fill="#2c58a8"/>
- <ellipse cx="128" cy="116" rx="52" ry="44" fill="url(#bbB)"/>
- <path d="M98 100 C70 112 76 150 118 158 C150 160 160 140 150 120 C130 126 112 118 98 100Z" fill="url(#bbR)"/>
- <path d="M126 96 C158 94 176 116 168 144 C148 148 122 134 112 112 C112 104 118 98 126 96Z" fill="#2c58a8"/>
- <path d="M130 108 C146 110 158 122 160 136 M124 116 C138 120 148 130 150 140" stroke="#5b8fe0" stroke-width="2" fill="none" opacity=".7" stroke-linecap="round"/>
- <path d="M112 158 v12 M130 160 v10" stroke="#2a2433" stroke-width="3.2" stroke-linecap="round"/>
+ <path class="bk" d="M168 128 L228 156 L216 168 L158 150Z"/>
+ <ellipse class="ol" cx="128" cy="116" rx="52" ry="44"/>
+ <path class="ln" stroke-width="2" d="M92 132 q4 4 8 0 M106 144 q4 4 8 0 M120 134 q4 4 8 0 M104 124 q4 4 8 0 M132 146 q4 4 8 0"/>
+ <path class="bk" d="M126 96 C158 94 176 116 168 144 C148 148 122 134 112 112 C112 104 118 98 126 96Z"/>
+ <path class="lw" stroke-width="2" d="M130 108 C146 110 158 122 160 136 M124 118 C138 122 148 130 150 140"/>
+ <path class="ln" d="M112 158 v12 M130 160 v10"/>
  <g class="head" style="transform-origin:110px 100px">
-  <circle cx="96" cy="80" r="30" fill="url(#bbB)"/>
-  <path d="M68 76 L48 84 L68 91Z" fill="#2a2433"/>
-  <circle cx="84" cy="90" r="5.5" fill="#ff9d7a" opacity=".38"/>
-  <g class="eye" style="transform-origin:86px 74px"><circle cx="86" cy="74" r="4.6" fill="#1a1426"/><circle cx="87.5" cy="72.4" r="1.6" fill="#fff"/></g>
+  <circle class="ol" cx="96" cy="80" r="30"/>
+  <path class="bk" d="M68 76 L48 84 L68 91Z"/>
+  <g class="eye" style="transform-origin:86px 74px"><circle class="bk" cx="86" cy="74" r="4.8"/><circle class="wh" cx="87.5" cy="72.4" r="1.6"/></g>
  </g>
 </g></svg>`;
 
 const cardinal = () => `<svg viewBox="0 0 260 200" role="img" aria-label="A cardinal on a branch">
-<defs>
- <linearGradient id="cdB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0594b"/><stop offset="1" stop-color="#b52a2e"/></linearGradient>
- <radialGradient id="cdG"><stop offset="0" stop-color="#fff0c4" stop-opacity=".6"/><stop offset="1" stop-color="#fff0c4" stop-opacity="0"/></radialGradient>
-</defs>
-<circle cx="128" cy="112" r="96" fill="url(#cdG)"/>
-${branch('#5a3b2c', '#8a6650', '#5f9d6a', '#3f7d55')}
+${branch(true)}
 <g class="bob">
- <path d="M166 126 L238 158 L226 172 L156 152Z" fill="#a32a2d"/>
- <ellipse cx="128" cy="116" rx="52" ry="44" fill="url(#cdB)"/>
- <ellipse cx="106" cy="128" rx="30" ry="24" fill="#f27565" opacity=".5"/>
- <path d="M126 96 C158 94 176 116 168 146 C148 150 122 134 112 112 C112 104 118 98 126 96Z" fill="#9a2227"/>
- <path d="M130 108 C146 110 158 122 160 138 M124 116 C138 120 148 130 150 142" stroke="#c9423b" stroke-width="2" fill="none" opacity=".75" stroke-linecap="round"/>
- <path d="M112 158 v12 M130 160 v10" stroke="#3a2a28" stroke-width="3.2" stroke-linecap="round"/>
+ <path class="bk" d="M166 126 L238 158 L226 172 L156 152Z"/>
+ <ellipse class="bk" cx="128" cy="116" rx="52" ry="44"/>
+ <path class="lw" stroke-width="2" d="M92 130 q4 4 8 0 M104 142 q4 4 8 0 M118 134 q4 4 8 0 M102 120 q4 4 8 0"/>
+ <path class="lw" d="M126 96 C158 94 176 116 168 146 C148 150 122 134 112 112 C112 104 118 98 126 96Z"/>
+ <path class="lw" stroke-width="2" d="M130 108 C146 110 158 122 160 138 M124 118 C138 122 148 130 150 142"/>
+ <path class="ln" d="M112 158 v12 M130 160 v10"/>
  <g class="head" style="transform-origin:110px 100px">
-  <circle cx="96" cy="80" r="30" fill="url(#cdB)"/>
-  <path d="M78 58 C84 38 100 24 118 12 C112 30 116 48 126 68Z" fill="#d93f3a"/>
-  <path d="M70 72 C70 62 82 60 92 66 C94 80 88 94 74 94 C66 90 66 80 70 72Z" fill="#2b1a22"/>
-  <path d="M66 74 L44 84 L66 95Z" fill="#ffa73b"/>
-  <path d="M44 84 L66 84" stroke="#d97d1c" stroke-width="1.6"/>
-  <g class="eye" style="transform-origin:84px 76px"><circle cx="84" cy="76" r="4.6" fill="#4a2e38" stroke="#8a5a64" stroke-width="1"/><circle cx="85.5" cy="74.4" r="1.7" fill="#fff"/></g>
+  <circle class="bk" cx="96" cy="80" r="30"/>
+  <path class="bk" d="M78 58 C84 38 100 24 118 12 C112 30 116 48 126 68Z"/>
+  <path class="lw" stroke-width="2" d="M70 72 C70 62 82 60 92 66 C94 80 88 94 74 94 C66 90 66 80 70 72Z"/>
+  <path class="ol" stroke-width="2.2" d="M66 74 L44 84 L66 95Z"/>
+  <g class="eye" style="transform-origin:84px 76px"><circle class="wh" cx="84" cy="76" r="4.6"/><circle class="bk" cx="84.6" cy="76.4" r="2"/></g>
  </g>
 </g></svg>`;
 
 const owl = asleep => `<svg class="owl${asleep ? ' asleep' : ''}" viewBox="0 0 260 200" role="img" aria-label="An owl on a branch">
-<defs>
- <linearGradient id="owB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9886bd"/><stop offset="1" stop-color="#58487f"/></linearGradient>
- <radialGradient id="owE"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f0a93f"/></radialGradient>
- <radialGradient id="owG"><stop offset="0" stop-color="#cdbdf5" stop-opacity=".4"/><stop offset="1" stop-color="#cdbdf5" stop-opacity="0"/></radialGradient>
-</defs>
-<circle cx="130" cy="112" r="100" fill="url(#owG)"/>
-${branch('#3c2a38', '#6a4b58', '#4b7a78', '#37605f')}
+${branch(false)}
 <g class="owl-all">
- <path d="M96 60 L97 28 L122 50Z" fill="#6b5a92"/><path d="M164 60 L163 28 L138 50Z" fill="#6b5a92"/>
- <ellipse cx="130" cy="110" rx="48" ry="56" fill="url(#owB)"/>
- <path d="M84 92 C66 116 70 152 94 166 C102 142 102 114 96 92Z" fill="#4b3c72"/>
- <path d="M176 92 C194 116 190 152 166 166 C158 142 158 114 164 92Z" fill="#4b3c72"/>
- <ellipse cx="130" cy="132" rx="27" ry="33" fill="#e6dcf2" opacity=".92"/>
- <path d="M116 116 q7 6 14 0 q7 6 14 0 M114 130 q8 6 16 0 q8 6 16 0 M116 144 q7 6 14 0 q7 6 14 0 M122 156 q4 4 8 0 q4 4 8 0" stroke="#9886bd" stroke-width="2.2" fill="none" stroke-linecap="round"/>
- <circle cx="110" cy="86" r="24" fill="#d8cdea"/><circle cx="150" cy="86" r="24" fill="#d8cdea"/>
- <path d="M90 68 Q108 58 126 72 M170 68 Q152 58 134 72" stroke="#6b5a92" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+ <path class="bk" d="M96 60 L97 28 L122 50Z"/><path class="bk" d="M164 60 L163 28 L138 50Z"/>
+ <ellipse class="ol" cx="130" cy="110" rx="48" ry="56"/>
+ <path class="bk" d="M84 92 C66 116 70 152 94 166 C102 142 102 114 96 92Z"/>
+ <path class="bk" d="M176 92 C194 116 190 152 166 166 C158 142 158 114 164 92Z"/>
+ <path class="ln" stroke-width="2.2" d="M116 116 q7 6 14 0 q7 6 14 0 M114 130 q8 6 16 0 q8 6 16 0 M116 144 q7 6 14 0 q7 6 14 0 M122 156 q4 4 8 0 q4 4 8 0"/>
+ <circle class="ol" cx="110" cy="86" r="24"/><circle class="ol" cx="150" cy="86" r="24"/>
+ <path class="ln" stroke-width="4" d="M90 68 Q108 58 126 72 M170 68 Q152 58 134 72"/>
  <g class="open">
-  <g class="eye" style="transform-origin:110px 86px"><circle cx="110" cy="86" r="15" fill="url(#owE)"/><circle cx="110" cy="86" r="7.5" fill="#1a1426"/><circle cx="113.2" cy="82.4" r="2.6" fill="#fff"/></g>
-  <g class="eye" style="transform-origin:150px 86px"><circle cx="150" cy="86" r="15" fill="url(#owE)"/><circle cx="150" cy="86" r="7.5" fill="#1a1426"/><circle cx="153.2" cy="82.4" r="2.6" fill="#fff"/></g>
+  <g class="eye" style="transform-origin:110px 86px"><circle class="bk" cx="110" cy="86" r="13"/><circle class="wh" cx="110" cy="86" r="7"/><circle class="bk" cx="110" cy="86" r="4"/></g>
+  <g class="eye" style="transform-origin:150px 86px"><circle class="bk" cx="150" cy="86" r="13"/><circle class="wh" cx="150" cy="86" r="7"/><circle class="bk" cx="150" cy="86" r="4"/></g>
  </g>
- <g class="shut"><path d="M95 88 Q110 100 125 88 M135 88 Q150 100 165 88" stroke="#2a2036" stroke-width="3.2" fill="none" stroke-linecap="round"/></g>
- <path d="M130 90 L123 102 L130 111 L137 102Z" fill="#ff9a4a"/>
- <ellipse cx="116" cy="168" rx="10" ry="4.5" fill="#ffb36b"/><ellipse cx="144" cy="168" rx="10" ry="4.5" fill="#ffb36b"/>
+ <g class="shut"><path class="ln" stroke-width="3.2" d="M95 88 Q110 100 125 88 M135 88 Q150 100 165 88"/></g>
+ <path class="bk" d="M130 90 L123 102 L130 111 L137 102Z"/>
+ <path class="ln" d="M112 164 v6 M118 164 v6 M142 164 v6 M148 164 v6"/>
 </g>
 <text class="z" x="186" y="64" font-size="22">z</text><text class="z z2" x="200" y="46" font-size="16">z</text>
 </svg>`;
@@ -611,10 +536,15 @@ function settingsScreen() {
 const SCREENS = { welcome: welcomeScreen, morning: morningScreen, day: dayScreen, night: nightScreen, asleep: asleepScreen, history: historyScreen, entry: entryScreen, settings: settingsScreen };
 
 /* ---------- render ---------- */
+let lastDark = null;
 function render() {
   const d = day();
   const sky = ['history', 'entry', 'settings', 'asleep'].includes(view) ? 'night' : view === 'welcome' ? 'morning' : view;
+  const dark = sky === 'night';
+  if (dark !== lastDark && lastDark !== null && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.body.animate({ opacity: [0, 1] }, { duration: 700, easing: 'ease-out' });
+  lastDark = dark;
   document.body.dataset.sky = sky;
+  const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute('content', sky === 'night' ? '#000000' : '#ffffff');
   const nav = $('#nav');
   const showNav = ['morning', 'day', 'night', 'asleep'].includes(view);
   nav.hidden = !showNav;
@@ -628,7 +558,6 @@ function render() {
   $('#stage').innerHTML = SCREENS[view]();
   $('.app').scrollTop = 0;
   lineIx = 0;
-  paintSky();
 }
 
 function home() { const d = day(); return !db.settings.welcomed ? 'welcome' : d.phase === 'done' ? 'asleep' : d.phase; }
@@ -745,41 +674,6 @@ setInterval(tick, 15000);
 document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); else tick(); });
 addEventListener('focus', tick);
 addEventListener('pagehide', flush);
-
-/* ---------- motes and stars ---------- */
-const cv = $('#motes'), cx = cv.getContext('2d');
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let W = 0, H = 0, nightF = 0;
-const rnd = (a, b) => a + Math.random() * (b - a);
-const motes = Array.from({ length: 36 }, () => ({ x: Math.random(), y: Math.random(), r: rnd(0.8, 2.4), s: rnd(0.4, 1), ph: rnd(0, 6.28) }));
-const stars = Array.from({ length: 80 }, () => ({ x: Math.random(), y: Math.random() * 0.7, r: rnd(0.4, 1.4), ph: rnd(0, 6.28) }));
-function fit() { const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); }
-addEventListener('resize', () => { fit(); paintSky(); });
-fit();
-let last = 0;
-function paintSky(t = 0) {
-  const sky = document.body.dataset.sky, dt = Math.min(50, t - last || 16); last = t;
-  nightF += ((sky === 'night' ? 1 : 0) - nightF) * (reduce ? 1 : 0.025);
-  cx.clearRect(0, 0, W, H);
-  for (const s of stars) {
-    const a = nightF * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t / 800 + s.ph)));
-    if (a < 0.02) continue;
-    cx.fillStyle = `rgba(255,248,230,${a})`; cx.beginPath(); cx.arc(s.x * W, s.y * H, s.r, 0, 6.283); cx.fill();
-  }
-  const col = sky === 'night' ? '255,236,140' : sky === 'day' ? '255,255,255' : '255,222,166';
-  for (const m of motes) {
-    if (sky === 'night') { m.x += Math.sin(t / 2600 + m.ph) * 0.00012 * dt; m.y += Math.cos(t / 3100 + m.ph) * 0.00008 * dt; }
-    else if (sky === 'day') { m.x += m.s * 0.00006 * dt; m.y += Math.sin(t / 2000 + m.ph) * 0.00003 * dt; }
-    else m.y -= m.s * 0.00004 * dt;
-    if (m.y < -0.02) m.y = 1.02; if (m.y > 1.02) m.y = -0.02; if (m.x > 1.02) m.x = -0.02; if (m.x < -0.02) m.x = 1.02;
-    const pulse = sky === 'night' ? 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(t / 700 + m.ph * 3)) : 0.55;
-    const a = (sky === 'day' ? 0.35 : 0.7) * pulse;
-    const g = cx.createRadialGradient(m.x * W, m.y * H, 0, m.x * W, m.y * H, m.r * 5);
-    g.addColorStop(0, `rgba(${col},${a})`); g.addColorStop(1, `rgba(${col},0)`);
-    cx.fillStyle = g; cx.beginPath(); cx.arc(m.x * W, m.y * H, m.r * 5, 0, 6.283); cx.fill();
-  }
-}
-if (!reduce) { const loop = t => { paintSky(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
 
 /* ---------- go ---------- */
 view = home();

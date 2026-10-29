@@ -11,7 +11,7 @@ const write = (name, data) => writeFileSync(new URL(name, OUT), data);
 const page = readFileSync(new URL("./journalbird.html", import.meta.url), "utf8");
 const version = Date.now().toString(36);
 
-// ---------- icons: the bluebird on a dawn sky, drawn pixel by pixel ----------
+// ---------- icons: the bluebird in ink on paper, drawn pixel by pixel ----------
 function crc32(buf) {
   let c, crc = 0xffffffff;
   for (let n = 0; n < buf.length; n++) {
@@ -44,28 +44,22 @@ const tri = (u, v, [ax, ay], [bx, by], [cx, cy]) => {
   return l1 >= 0 && l2 >= 0 && l1 + l2 <= 1;
 };
 
-const SKY = [[0, hex("#3c4a96")], [0.55, hex("#b0689f")], [1, hex("#ffb27a")]];
-function sky(u, v) {
-  let c = SKY[SKY.length - 1][1];
-  for (let i = 0; i < SKY.length - 1; i++) {
-    if (v <= SKY[i + 1][0]) { c = mixC(SKY[i][1], SKY[i + 1][1], (v - SKY[i][0]) / (SKY[i + 1][0] - SKY[i][0])); break; }
-  }
-  const glow = Math.exp(-(((u - 0.5) / 0.5) ** 2 + ((v - 1.0) / 0.35) ** 2));
-  return mixC(c, hex("#ffe2b0"), glow * 0.7);
-}
-
-const BLUE = hex("#4f8be0"), WING = hex("#2c58a8"), BREAST = hex("#f3a46c"), DARK = hex("#2a2433"), BRANCH = hex("#5b3f30"), WHITE = [255, 255, 255];
+// two tones only: ink on paper
+const PAPER = hex("#ffffff"), INK = hex("#111111");
+const sky = () => PAPER;
 function art(u, v) {
-  if (ell(u, v, 0.5, 0.79, 0.42, 0.028, 0.02)) return BRANCH;
-  if (ell(u, v, 0.77, 0.68, 0.15, 0.05, 0.5)) return WING;
+  if (ell(u, v, 0.5, 0.79, 0.42, 0.026, 0.02)) return INK; // branch
+  if (ell(u, v, 0.77, 0.68, 0.15, 0.05, 0.5)) return INK; // tail
   const body = ell(u, v, 0.53, 0.58, 0.27, 0.21, 0.12);
-  if (body && ell(u, v, 0.44, 0.64, 0.17, 0.12, -0.25)) return BREAST;
-  if (ell(u, v, 0.6, 0.55, 0.17, 0.1, 0.5)) return WING;
-  if (body) return BLUE;
-  if (tri(u, v, [0.22, 0.4], [0.1, 0.46], [0.23, 0.5])) return DARK;
-  if (ell(u, v, 0.3, 0.385, 0.011, 0.011)) return WHITE;
-  if (ell(u, v, 0.31, 0.395, 0.024, 0.024)) return DARK;
-  if (ell(u, v, 0.37, 0.43, 0.165, 0.165)) return BLUE;
+  const head = ell(u, v, 0.37, 0.43, 0.165, 0.165);
+  const wingOuter = ell(u, v, 0.6, 0.55, 0.17, 0.1, 0.5);
+  if (body) {
+    if (ell(u, v, 0.42, 0.66, 0.1, 0.075, -0.3)) return PAPER; // breast
+    if (wingOuter && !ell(u, v, 0.6, 0.55, 0.15, 0.08, 0.5)) return PAPER; // wing outline
+    return INK;
+  }
+  if (tri(u, v, [0.22, 0.4], [0.1, 0.46], [0.23, 0.5])) return INK; // beak
+  if (head) return ell(u, v, 0.3, 0.385, 0.017, 0.017) ? PAPER : INK; // head and eye
   return null;
 }
 
@@ -104,8 +98,8 @@ write("manifest.webmanifest", JSON.stringify({
   scope: "./",
   display: "standalone",
   orientation: "portrait",
-  background_color: "#17123a",
-  theme_color: "#17123a",
+  background_color: "#ffffff",
+  theme_color: "#ffffff",
   icons: [
     { src: "icon-192.png", sizes: "192x192", type: "image/png" },
     { src: "icon-512.png", sizes: "512x512", type: "image/png" },
@@ -145,11 +139,11 @@ write("index.html", `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#17123a">
+<meta name="theme-color" content="#ffffff">
 <meta name="description" content="A morning, a day and a night, each with its own bird.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="JournalBird">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-192.png">
